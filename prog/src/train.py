@@ -24,6 +24,7 @@ from models.ResNet import ResNet
 from models.UNet import UNet
 from models.VggNet import VggNet
 from torchvision import datasets
+import numpy as np
 
 
 def argument_parser():
@@ -60,7 +61,7 @@ def argument_parser():
 if __name__ == "__main__":
 
     args = argument_parser()
-
+        
     batch_size = args.batch_size
     num_epochs = args.num_epochs
     val_set = args.validation
@@ -83,17 +84,31 @@ if __name__ == "__main__":
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
+    
+    augment_transform = transforms.Compose([        
+        transforms.RandomRotation(25),
+        transforms.ColorJitter(),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomResizedCrop(32),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
+
+    train_transform = test_transform = base_transform
+
+    if data_augment:
+        train_transform = augment_transform
 
     if args.dataset == 'cifar10':
         # Download the train and test set and apply transform on it
-        train_set = datasets.CIFAR10(root='../data', train=True, download=True, transform=base_transform)
-        test_set = datasets.CIFAR10(root='../data', train=False, download=True, transform=base_transform)
+        train_set = datasets.CIFAR10(root='../data', train=True, download=True, transform=train_transform)
+        test_set = datasets.CIFAR10(root='../data', train=False, download=True, transform=test_transform)
 
     elif args.dataset == 'svhn':
         # Download the train and test set and apply transform on it
-        train_set = datasets.SVHN(root='../data', split='train', download=True, transform=base_transform)
-        test_set = datasets.SVHN(root='../data', split='test', download=True, transform=base_transform)
-
+        train_set = datasets.SVHN(root='../data', split='train', download=True, transform=train_transform)
+        test_set = datasets.SVHN(root='../data', split='test', download=True, transform=test_transform)
+    
     if args.optimizer == 'SGD':
         optimizer_factory = optimizer_setup(torch.optim.SGD, lr=learning_rate, momentum=0.9)
     elif args.optimizer == 'Adam':
