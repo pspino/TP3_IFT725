@@ -94,10 +94,24 @@ if __name__ == "__main__":
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
-    train_transform = test_transform = base_transform
+    acdc_augment_transform = transforms.Compose([        
+        transforms.RandomRotation(25),
+        transforms.ColorJitter(),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomResizedCrop(32),
+        transforms.ToTensor()
+    ])
+
+    if datasets == 'UNet':
+        train_transform = test_transform = acdc_base_transform
+    else:
+        train_transform = test_transform = base_transform
 
     if data_augment:
-        train_transform = augment_transform
+        if args.dataset == 'UNet':
+            train_transform = acdc_augment_transform
+        else:
+            train_transform = augment_transform
 
     if args.dataset == 'cifar10':
         # Download the train and test set and apply transform on it
@@ -128,8 +142,8 @@ if __name__ == "__main__":
         model = UNet(num_classes=4)
         args.dataset = 'acdc'
 
-        train_set = HDF5Dataset('train', hdf5_file, transform=acdc_base_transform)
-        test_set = HDF5Dataset('test', hdf5_file, transform=acdc_base_transform)
+        train_set = HDF5Dataset('train', hdf5_file, transform=train_transform)
+        test_set = HDF5Dataset('test', hdf5_file, transform=test_transform)
 
     model_trainer = CNNTrainTestManager(model=model,
                                         trainset=train_set,
