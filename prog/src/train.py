@@ -94,7 +94,7 @@ if __name__ == "__main__":
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
-    acdc_augment_transform = transforms.Compose([        
+    acdc_augment_transform = transforms.Compose([
         transforms.RandomRotation(25),
         transforms.ColorJitter(),
         transforms.RandomHorizontalFlip(),
@@ -102,13 +102,13 @@ if __name__ == "__main__":
         transforms.ToTensor()
     ])
 
-    if datasets == 'UNet':
+    if args.model == 'UNet':
         train_transform = test_transform = acdc_base_transform
     else:
         train_transform = test_transform = base_transform
 
     if data_augment:
-        if args.dataset == 'UNet':
+        if args.model == 'UNet':
             train_transform = acdc_augment_transform
         else:
             train_transform = augment_transform
