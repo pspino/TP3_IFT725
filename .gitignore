@@ -1,5 +1,5 @@
 *.hdf5
-prog/data/*
+prog/data/
 prog/src/__pycache__/*
 prog/src/models/__pycache__/*
 .vscode/
