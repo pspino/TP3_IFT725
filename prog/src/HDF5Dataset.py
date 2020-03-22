@@ -16,7 +16,6 @@ import torch
 from torch.utils import data
 from utils import centered_resize
 
-
 class HDF5Dataset(data.Dataset):
     """
     class that loads hdf5 dataset object

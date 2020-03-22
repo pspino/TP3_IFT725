@@ -95,7 +95,9 @@ if __name__ == "__main__":
     ])
 
     acdc_augment_transform = transforms.Compose([
-        transforms.RandomRotation(25),
+        transforms.ToPILImage(),
+        transforms.Grayscale(num_output_channels=1),
+        transforms.RandomRotation(25, fill=(0,)),
         transforms.ColorJitter(),
         transforms.RandomHorizontalFlip(),
         transforms.RandomResizedCrop(32),
@@ -122,7 +124,7 @@ if __name__ == "__main__":
         # Download the train and test set and apply transform on it
         train_set = datasets.SVHN(root='../data', split='train', download=True, transform=train_transform)
         test_set = datasets.SVHN(root='../data', split='test', download=True, transform=test_transform)
-    
+
     if args.optimizer == 'SGD':
         optimizer_factory = optimizer_setup(torch.optim.SGD, lr=learning_rate, momentum=0.9)
     elif args.optimizer == 'Adam':
