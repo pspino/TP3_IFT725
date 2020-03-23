@@ -20,6 +20,7 @@ from HDF5Dataset import HDF5Dataset
 from models.AlexNet import AlexNet
 from models.CNNVanilla import CnnVanilla
 from models.IFT725Net import IFT725Net
+from models.IFT725UNet import IFT725UNet
 from models.ResNet import ResNet
 from models.UNet import UNet
 from models.VggNet import VggNet
@@ -39,7 +40,7 @@ def argument_parser():
                                                  " need to provide a dataset since UNet model only train "
                                                  "on acdc dataset.")
     parser.add_argument('--model', type=str, default="CnnVanilla",
-                        choices=["CnnVanilla", "VggNet", "AlexNet", "ResNet", "IFT725Net", "UNet"])
+                        choices=["CnnVanilla", "VggNet", "AlexNet", "ResNet", "IFT725Net", "UNet", "IFT725UNet"])
     parser.add_argument('--dataset', type=str, default="cifar10", choices=["cifar10", "svhn"])
     parser.add_argument('--batch_size', type=int, default=20,
                         help='The size of the training batch')
@@ -104,13 +105,13 @@ if __name__ == "__main__":
         transforms.ToTensor()
     ])
 
-    if args.model == 'UNet':
+    if args.model == 'UNet' or args.model == 'IFT725UNet':
         train_transform = test_transform = acdc_base_transform
     else:
         train_transform = test_transform = base_transform
 
     if data_augment:
-        if args.model == 'UNet':
+        if args.model == 'UNet' or args.model == 'IFT725UNet':
             train_transform = acdc_augment_transform
         else:
             train_transform = augment_transform
@@ -143,7 +144,11 @@ if __name__ == "__main__":
     elif args.model == 'UNet':
         model = UNet(num_classes=4)
         args.dataset = 'acdc'
-
+        train_set = HDF5Dataset('train', hdf5_file, transform=train_transform)
+        test_set = HDF5Dataset('test', hdf5_file, transform=test_transform)
+    elif args.model == 'IFT725UNet':
+        model = IFT725UNet(num_classes=4)
+        args.dataset = 'acdc'
         train_set = HDF5Dataset('train', hdf5_file, transform=train_transform)
         test_set = HDF5Dataset('test', hdf5_file, transform=test_transform)
 
