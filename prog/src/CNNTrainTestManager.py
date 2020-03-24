@@ -15,6 +15,7 @@ from DataManager import DataManager
 from typing import Callable, Type
 from tqdm import tqdm
 from models.UNet import UNet
+from models.IFT725UNet import IFT725UNet
 from utils import mean_dice, convert_mask_to_rgb_image
 import matplotlib.pyplot as plt
 
@@ -171,7 +172,7 @@ class CNNTrainTestManager(object):
         Returns:
             Accuracy of the model
         """
-        if isinstance(self.model, UNet):
+        if isinstance(self.model, UNet) or isinstance(self.model, IFT725UNet):
             # compute the mean of the 3 classes's dice score
             return mean_dice(outputs, labels).item()
         else:
@@ -192,7 +193,7 @@ class CNNTrainTestManager(object):
                 test_inputs, test_labels = data[0].to(self.device), data[1].to(self.device)
                 test_outputs = self.model(test_inputs)
                 accuracies += self.accuracy(test_outputs, test_labels)
-        print("Accuracy (or Dice for UNet) on the test set: {:05.3f} %".format(100 * accuracies / len(test_loader)))
+        print("Accuracy (or Dice for UNet or IFT725UNet) on the test set: {:05.3f} %".format(100 * accuracies / len(test_loader)))
 
     def plot_metrics(self):
         """
