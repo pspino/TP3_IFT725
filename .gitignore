@@ -1,5 +1,6 @@
-*.hdf5
-prog/data/
+prog/data/*mat
+prog/data/*.tar*
+prog/data/*cifar*
 prog/src/__pycache__/*
 prog/src/models/__pycache__/*
 .vscode/
