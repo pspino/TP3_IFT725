@@ -195,7 +195,7 @@ class CNNTrainTestManager(object):
                 accuracies += self.accuracy(test_outputs, test_labels)
         print("Accuracy (or Dice for UNet or IFT725UNet) on the test set: {:05.3f} %".format(100 * accuracies / len(test_loader)))
 
-    def plot_metrics(self):
+    def plot_metrics(self, out):
         """
         Function that plots train and validation losses and accuracies after training phase
         """
@@ -220,7 +220,7 @@ class CNNTrainTestManager(object):
         ax2.set_xlabel('Epochs')
         ax2.set_ylabel('accuracy')
         ax2.legend()
-        f.savefig('fig1.png')
+        f.savefig(out+'fig1.png')
         plt.show()
 
     def plot_image_mask_prediction(self):

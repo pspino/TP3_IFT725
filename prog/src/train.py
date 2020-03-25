@@ -56,6 +56,8 @@ def argument_parser():
                         help="Data augmentation")
     parser.add_argument('--predict', action='store_true',
                         help="Use UNet model to predict the mask of a randomly selected image from the test set")
+    parser.add_argument('--out', type=str, default='', 
+                        help="output directory for metric plot")
     return parser.parse_args()
 
 
@@ -169,7 +171,7 @@ if __name__ == "__main__":
         print("Training {} on {} for {} epochs".format(model.__class__.__name__, args.dataset, args.num_epochs))
         model_trainer.train(num_epochs)
         model_trainer.evaluate_on_test_set()
-        if isinstance(model, UNet):
+        if isinstance(model, UNet) or isinstance(model, IFT725UNet):
             model.save()  # save the model's weights for prediction (see help for more details)
             model_trainer.plot_image_mask_prediction()
-        model_trainer.plot_metrics()
+        model_trainer.plot_metrics(args.out)

@@ -202,10 +202,10 @@ def dice(input: Tensor, target: Tensor, label: Tensor, reduction: str = 'mean') 
     target = torch.flatten(target, start_dim=1)
 
     # Compute dice score
+    # The cast in this section are for torch 1.2, calcul qc's cuda version does not support torch 1.3.1 nor 1.4
     intersect = torch.sum(input * target.float(), 1, keepdim=True)
     sum_input = torch.sum(input, 1, keepdim=True)
-    sum_target = torch.sum(target, 1, keepdim=True)
-    
+    sum_target = torch.sum(target, 1, keepdim=True)    
     dice = torch.mean((2 * intersect + 1) / (sum_input.long() + sum_target + 1).float(), dim=reduce_axis)
     return dice
 
@@ -223,7 +223,10 @@ def mean_dice(input: Tensor, target: Tensor, reduction: str = 'mean') -> Tensor:
     Returns:
         (1,) or (N,), the mean dice score for the classes in the target, reduced or for each sample.
     """
-    labels = torch.tensor([1,2,3], dtype=torch.long).to('cuda:0')#torch.unique(target[target.nonzero(as_tuple=True)])  # Identify classes (that are not backgroud)
+    # fix a bug where the label tensor would be empty   
+    labels = torch.tensor([1,2,3], dtype=torch.long).to('cuda:0')
+    # the line above is a hardcode hack to set cuda for calcul qc, comment it and uncomment the line below when running on other device
+    #labels = torch.unique(target[target.nonzero(as_tuple=True)])  # Identify classes (that are not backgroud)
     # Compute the dice score for each individual class
 
     dices = torch.stack([dice(input, target, label, reduction=reduction)
