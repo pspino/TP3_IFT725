@@ -202,10 +202,11 @@ def dice(input: Tensor, target: Tensor, label: Tensor, reduction: str = 'mean') 
     target = torch.flatten(target, start_dim=1)
 
     # Compute dice score
-    intersect = torch.sum(input * target, 1, keepdim=True)
+    intersect = torch.sum(input * target.float(), 1, keepdim=True)
     sum_input = torch.sum(input, 1, keepdim=True)
     sum_target = torch.sum(target, 1, keepdim=True)
-    dice = torch.mean((2 * intersect + 1) / (sum_input + sum_target + 1), dim=reduce_axis)
+    
+    dice = torch.mean((2 * intersect + 1) / (sum_input.long() + sum_target + 1).float(), dim=reduce_axis)
     return dice
 
 
@@ -222,9 +223,9 @@ def mean_dice(input: Tensor, target: Tensor, reduction: str = 'mean') -> Tensor:
     Returns:
         (1,) or (N,), the mean dice score for the classes in the target, reduced or for each sample.
     """
-    labels = torch.tensor([1, 2, 3], dtype=torch.long)#torch.unique(target[target.nonzero(as_tuple=True)])  # Identify classes (that are not background)
-
+    labels = torch.tensor([1,2,3], dtype=torch.long).to('cuda:0')#torch.unique(target[target.nonzero(as_tuple=True)])  # Identify classes (that are not backgroud)
     # Compute the dice score for each individual class
+
     dices = torch.stack([dice(input, target, label, reduction=reduction)
                          for label in labels])
 
