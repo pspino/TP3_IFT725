@@ -1,6 +1,4 @@
-prog/data/*mat
-prog/data/*.tar*
-prog/data/*cifar*
+prog/data/*
 prog/src/__pycache__/*
 prog/src/models/__pycache__/*
 .vscode/

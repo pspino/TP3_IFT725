@@ -100,7 +100,7 @@ if __name__ == "__main__":
     acdc_augment_transform = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Grayscale(num_output_channels=1),
-        transforms.RandomRotation(25),
+        transforms.RandomRotation(25, fill=(0,)),
         transforms.ColorJitter(),
         transforms.RandomHorizontalFlip(),
         transforms.RandomResizedCrop(32),

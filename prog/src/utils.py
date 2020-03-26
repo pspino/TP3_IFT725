@@ -224,9 +224,9 @@ def mean_dice(input: Tensor, target: Tensor, reduction: str = 'mean') -> Tensor:
         (1,) or (N,), the mean dice score for the classes in the target, reduced or for each sample.
     """
     # fix a bug where the label tensor would be empty   
-    labels = torch.tensor([1,2,3], dtype=torch.long).to('cuda:0')
+    #labels = torch.tensor([1,2,3], dtype=torch.long).to('cuda:0')
     # the line above is a hardcode hack to set cuda for calcul qc, comment it and uncomment the line below when running on other device
-    #labels = torch.unique(target[target.nonzero(as_tuple=True)])  # Identify classes (that are not backgroud)
+    labels = torch.unique(target[target.nonzero(as_tuple=True)])  # Identify classes (that are not backgroud)
     # Compute the dice score for each individual class
 
     dices = torch.stack([dice(input, target, label, reduction=reduction)
