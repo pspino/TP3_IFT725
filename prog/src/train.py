@@ -20,6 +20,7 @@ from HDF5Dataset import HDF5Dataset
 from models.AlexNet import AlexNet
 from models.CNNVanilla import CnnVanilla
 from models.IFT725Net import IFT725Net
+from models.IFT725UNet import IFT725UNet
 from models.ResNet import ResNet
 from models.UNet import UNet
 from models.VggNet import VggNet
@@ -39,7 +40,7 @@ def argument_parser():
                                                  " need to provide a dataset since UNet model only train "
                                                  "on acdc dataset.")
     parser.add_argument('--model', type=str, default="CnnVanilla",
-                        choices=["CnnVanilla", "VggNet", "AlexNet", "ResNet", "IFT725Net", "UNet"])
+                        choices=["CnnVanilla", "VggNet", "AlexNet", "ResNet", "IFT725Net", "UNet", "IFT725UNet"])
     parser.add_argument('--dataset', type=str, default="cifar10", choices=["cifar10", "svhn"])
     parser.add_argument('--batch_size', type=int, default=20,
                         help='The size of the training batch')
@@ -55,6 +56,8 @@ def argument_parser():
                         help="Data augmentation")
     parser.add_argument('--predict', action='store_true',
                         help="Use UNet model to predict the mask of a randomly selected image from the test set")
+    parser.add_argument('--out', type=str, default='', 
+                        help="output directory for metric plot")
     return parser.parse_args()
 
 
@@ -94,21 +97,23 @@ if __name__ == "__main__":
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
-    acdc_augment_transform = transforms.Compose([        
-        transforms.RandomRotation(25),
+    acdc_augment_transform = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.Grayscale(num_output_channels=1),
+        transforms.RandomRotation(25, fill=(0,)),
         transforms.ColorJitter(),
         transforms.RandomHorizontalFlip(),
         transforms.RandomResizedCrop(32),
         transforms.ToTensor()
     ])
 
-    if datasets == 'UNet':
+    if args.model == 'UNet' or args.model == 'IFT725UNet':
         train_transform = test_transform = acdc_base_transform
     else:
         train_transform = test_transform = base_transform
 
     if data_augment:
-        if args.dataset == 'UNet':
+        if args.model == 'UNet' or args.model == 'IFT725UNet':
             train_transform = acdc_augment_transform
         else:
             train_transform = augment_transform
@@ -122,7 +127,7 @@ if __name__ == "__main__":
         # Download the train and test set and apply transform on it
         train_set = datasets.SVHN(root='../data', split='train', download=True, transform=train_transform)
         test_set = datasets.SVHN(root='../data', split='test', download=True, transform=test_transform)
-    
+
     if args.optimizer == 'SGD':
         optimizer_factory = optimizer_setup(torch.optim.SGD, lr=learning_rate, momentum=0.9)
     elif args.optimizer == 'Adam':
@@ -141,7 +146,11 @@ if __name__ == "__main__":
     elif args.model == 'UNet':
         model = UNet(num_classes=4)
         args.dataset = 'acdc'
-
+        train_set = HDF5Dataset('train', hdf5_file, transform=train_transform)
+        test_set = HDF5Dataset('test', hdf5_file, transform=test_transform)
+    elif args.model == 'IFT725UNet':
+        model = IFT725UNet(num_classes=4)
+        args.dataset = 'acdc'
         train_set = HDF5Dataset('train', hdf5_file, transform=train_transform)
         test_set = HDF5Dataset('test', hdf5_file, transform=test_transform)
 
@@ -162,7 +171,7 @@ if __name__ == "__main__":
         print("Training {} on {} for {} epochs".format(model.__class__.__name__, args.dataset, args.num_epochs))
         model_trainer.train(num_epochs)
         model_trainer.evaluate_on_test_set()
-        if isinstance(model, UNet):
+        if isinstance(model, UNet) or isinstance(model, IFT725UNet):
             model.save()  # save the model's weights for prediction (see help for more details)
             model_trainer.plot_image_mask_prediction()
-        model_trainer.plot_metrics()
+        model_trainer.plot_metrics(args.out)

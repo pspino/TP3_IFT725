@@ -16,7 +16,6 @@ import torch
 from torch.utils import data
 from utils import centered_resize
 
-
 class HDF5Dataset(data.Dataset):
     """
     class that loads hdf5 dataset object
@@ -92,7 +91,7 @@ class HDF5Dataset(data.Dataset):
             # we need to fix the seed to make those functions return same value when using random
 
             # fix a random seed
-            seed = np.random.randint(0, 2 ** 32)
+            seed = np.random.randint(0, 2 ** 16)
             # print(seed)
             torch.manual_seed(seed)
             # pass image and ground truth trough transform for data augmentation and normalization purposes

@@ -1,4 +1,3 @@
-*.hdf5
 prog/data/*
 prog/src/__pycache__/*
 prog/src/models/__pycache__/*
